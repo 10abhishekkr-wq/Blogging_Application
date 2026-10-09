@@ -1,47 +1,47 @@
-const {createHmac,randomBytes} = require("crypto")
+const { createHmac, randomBytes } = require("crypto")
 
-const {Schema,model} = require("mongoose");
+const { Schema, model } = require("mongoose");
 
 const userSchema = new Schema({
-    fullName:{
-        type:String,
-        required:true,
+    fullName: {
+        type: String,
+        required: true,
     },
-    email:{
-        type:String,
-        required:true,
-        unique:true,
+    email: {
+        type: String,
+        required: true,
+        unique: true,
     },
-    salt:{
-        type:String,
+    salt: {
+        type: String,
     },
-    password:{
-        type:String,
-        required:true,
+    password: {
+        type: String,
+        required: true,
     },
-    profileImageURL:{
-        type:String,
-        default:"/images/images.png"
+    profileImageURL: {
+        type: String,
+        default: "/images/images.png"
     },
-    role:{
-        type:String,
-        enum:["USER","ADMIN"],
-        default:"USER",
+    role: {
+        type: String,
+        enum: ["USER", "ADMIN"],
+        default: "USER",
     }
 },
-{timestamps:true}
+    { timestamps: true }
 )
 
 
 //Presave Middleware
 
-userSchema.pre("save",function (next){
+userSchema.pre("save", function (next) {
     const user = this;
 
-    if(!user.isModified("password")) return;
+    if (!user.isModified("password")) return;
 
     const salt = randomBytes(16).toString();
-    const hashedPassword = createHmac("sha256",salt).update(user.password).digest("hex");
+    const hashedPassword = createHmac("sha256", salt).update(user.password).digest("hex");
 
     this.salt = salt;
     this.password = hashedPassword;
@@ -50,6 +50,6 @@ userSchema.pre("save",function (next){
 })
 
 
-const User = model("user",userSchema)
+const User = model("user", userSchema)
 
 module.exports = User;
